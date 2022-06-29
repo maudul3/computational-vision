@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
+import matplotlib.cm as cm
+from random import random
+
 
 dir_path = Path(__file__).parent
 
@@ -21,7 +24,6 @@ def select_gaussian(padding):
             ]) * (1/273)
 
     return filter_matrix
-    
 
 def filter(image, padding=1, filter_type='gaussian'):
 
@@ -72,12 +74,11 @@ def sobel(image):
             ).astype(dogx.dtype)
     )
 
-
 if __name__ == '__main__':
     filterimg1 = plt.imread(dir_path / 'filter1_img.jpg')
     filterimg2 = plt.imread(dir_path / 'filter2_img.jpg')
 
-    '''plt.imshow(filterimg1, cmap='gray')
+    plt.imshow(filterimg1, cmap='gray')
     plt.show()
     plt.clf()
     
@@ -96,10 +97,9 @@ if __name__ == '__main__':
 
     dogy_filterimg1 = filter(filterimg1, filter_type='dogy')
     plt.imshow(dogy_filterimg1, cmap='gray')
-    plt.show()'''
+    plt.show()
 
     sobel_filterimg1 = sobel(filterimg1)
     print (sobel_filterimg1)
     plt.imshow(sobel_filterimg1, cmap='gray')
     plt.show()
-
