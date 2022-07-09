@@ -1,12 +1,19 @@
-import enum
-from gettext import find
-from random import random
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
 
 def find_matches(des1, des2):
-    """FINDS MATCHES"""
+    """FINDS MATCHES
+    
+    Inputs:
+        des1 (np.array): array of feature descriptors
+        des2 (np.array): array of feature descriptors
+
+    Returns:
+        tuple(tuple(int, np.array), tuple(int, np.array)):
+            tuple of tuples containing matching features
+            and associated keypoint image indices
+    """
     matches = []
 
     for i in range(len(des1)):
@@ -46,18 +53,19 @@ if __name__ == '__main__':
         flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
     )
     #-- Show detected matches
-    plt.imshow(img_matches)
+    plt.imshow(cv.cvtColor(img_matches, cv.COLOR_BGR2RGB))
     plt.show()
 
-    dmatches_1000 = sorted(dmatches, key=lambda y: y[0].distance)[0:1000]
+    top_10percent = int( 0.1 * len(dmatches) )
+    dmatches_10perc = sorted(dmatches, key=lambda y: y[0].distance)[0:top_10percent]
     img_matches = cv.drawMatchesKnn(
         img1, kp1, 
         img2, kp2, 
-        dmatches_1000, 
+        dmatches_10perc, 
         None,
         flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
     )
     #-- Show detected matches
-    plt.imshow(img_matches)
+    plt.imshow(cv.cvtColor(img_matches, cv.COLOR_BGR2RGB))
     plt.show()
 

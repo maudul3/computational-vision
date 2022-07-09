@@ -52,11 +52,11 @@ class Centroid:
         return (coord.x - self.mean.x)**2 + (coord.y - self.mean.y)**2 + (coord.z - self.mean.z)**2
 
     def calculate_mean_squared_error(self, data):
-            '''Calculate the mean squared error for this centroid'''
-            mse = 0
-            for idx in self.datapoints_idx:
-                mse += (data[idx].x - self.mean.x)**2 + (data[idx].y - self.mean.y)**2 + (data[idx].z - self.mean.z)**2  
-            return mse
+        '''Calculate the mean squared error for this centroid'''
+        mse = 0
+        for idx in self.datapoints_idx:                
+            mse += (data[idx].x - self.mean.x)**2 + (data[idx].y - self.mean.y)**2 + (data[idx].z - self.mean.z)**2  
+        return mse
 
 def plot_data_and_centroids(data, centroids, title):
     # Plot all of the clusters
@@ -90,7 +90,7 @@ def k_means(data, k, r, type='gaussian'):
     best_centroids = None
     best_mse = sys.maxsize
     for iteration in range(r):
-        
+        print (iteration)
         '''At beginning of each run reset datapoints associated with centroid'''
         for centroid in centroids:
             centroid.reset_datapoints()
@@ -136,28 +136,31 @@ def transform_and_plot_image(img_rows, img_cols, centroids):
     plt.show()
 
 if __name__ == '__main__':
-
+    
+    # Load the data
     gaussian_data = []
     with open(dir_path / '510_cluster_dataset.txt', 'r') as f:
         for line in f.readlines():
             x, y = line.split()
             gaussian_data.append(Coordinate(float(x),float(y)))
+    
+    # Part (a)
 
-    '''Part (a)
-    r = 1
-    k = 5
+    r = 10
+    k = 2
     best_c, best_mse = k_means(gaussian_data, k, r)
 
     plot_data_and_centroids(gaussian_data, best_c, "The best of the best with MSE: " + str(best_mse))
-    '''
-
-    '''Part b'''
+    
+    
+    # Part (b)
     kmean_img1 = plt.imread(dir_path / 'kmean_img1.jpg')
     kmean_img2 = plt.imread(dir_path / 'kmean_img2.jpg')
 
-    r = 5
-    k = 3
-    '''
+    r = 10
+    k = 10
+
+    ### Image 1
     img1_linear = []
     for i in range(len(kmean_img1)):
         for j in range(len(kmean_img1[0])): 
@@ -170,17 +173,18 @@ if __name__ == '__main__':
             )
     best_c, best_mse = k_means(img1_linear, k, r, type='img')
 
-    transform_and_plot_image(len(kmean_img1), len(kmean_img1[0]), best_c)'''
-    img2_linear = []
-    for i in range(len(kmean_img2)):
-        for j in range(len(kmean_img2[0])): 
-            img2_linear.append(
+    transform_and_plot_image(len(kmean_img1), len(kmean_img1[0]), best_c)
+    
+    ### Image 2 
+    img2_linear = [
                 Coordinate(
                     kmean_img2[i][j][0], 
                     kmean_img2[i][j][1], 
                     kmean_img2[i][j][2],
                 )
-            )
+                for i in range(len(kmean_img2))
+                for j in range(len(kmean_img2[0]))
+            ]
     best_c, best_mse = k_means(img2_linear, k, r, type='img')
 
     transform_and_plot_image(len(kmean_img2), len(kmean_img2[0]), best_c)
