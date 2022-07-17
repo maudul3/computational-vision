@@ -152,7 +152,6 @@ if __name__ == '__main__':
 
     plot_data_and_centroids(gaussian_data, best_c, "The best of the best with MSE: " + str(best_mse))
     
-    
     # Part (b)
     kmean_img1 = plt.imread(dir_path / 'kmean_img1.jpg')
     kmean_img2 = plt.imread(dir_path / 'kmean_img2.jpg')
