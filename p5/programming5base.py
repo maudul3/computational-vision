@@ -1,3 +1,6 @@
+'''
+BASE
+'''
 from keras.datasets import fashion_mnist
 import keras
 import numpy as np
@@ -58,17 +61,23 @@ if __name__ == '__main__':
 
     # Step 2
     '''Load and preprocess data'''
-    train_data, test_data = fashion_mnist.load_data()
-    #train_images, train_labels = train_data
-    train_images, train_labels = test_data
+    _, train_data = fashion_mnist.load_data()
+    train_images, train_labels = train_data
 
     '''Normalize intensity values'''
     train_images = np.array([np.reshape(2*(image / 255) - 1, (28, 28)) for image in train_images])
-    #test_images = np.array([np.reshape(image / 255, (28, 28))*2 - 1 for image in test_images])
 
+    '''Compile the discriminator and full model'''
     discriminator.compile(optimizer=keras.optimizers.adam_v2.Adam(learning_rate=1e-3), loss='binary_crossentropy')
     discriminator.trainable = False
     full_model.compile(optimizer=keras.optimizers.adam_v2.Adam(learning_rate=1e-3), loss='binary_crossentropy')
+
+    # Initial variables for loss arrays (for plotting) and loss variables for scalar loss 
+    disc_total_loss = []
+    gen_total_loss = []
+    disc_loss = None
+    gen_loss = None
+
 
     for epoch in range(100):
         print ("EPOCH: ", epoch )
@@ -87,32 +96,39 @@ if __name__ == '__main__':
             total_batch = np.array([row[0] for row in temp])
             true_labels = np.array([row[1] for row in temp])
             
+            # Train discriminator
             discriminator.trainable = True
 
             disc_loss = discriminator.train_on_batch(total_batch, true_labels)
 
             discriminator.trainable = False
 
+            # Train generator
             noise_batch = np.random.normal(size=[BATCH_SIZE, 1, 100])
 
-            '''np.array(
-                [np.random.multivariate_normal(
-                mean=[ 0 for _ in range(100) ],
-                cov=standard_covariance,
-                size=1
-                )
-            for _ in range(BATCH_SIZE)]
-            )'''
-
-            loss = full_model.train_on_batch(noise_batch, np.array([ 0.9 for _ in range(BATCH_SIZE)]))
+            gen_loss = full_model.train_on_batch(noise_batch, np.array([ 0.9 for _ in range(BATCH_SIZE)]))
             
             print ("Discriminator Loss: {}".format(disc_loss))
-            print ("Full Loss: {}".format(loss))
+            print ("Full Loss: {}".format(gen_loss))
         
-        if epoch % 10 == 0:
+        # Add to loss lists for later plotting
+        disc_total_loss.append(disc_loss)
+        gen_total_loss.append(gen_loss) 
+        
+        # Save sample images
+        if epoch == 0 or (epoch + 1) % 10 == 0:
             fake_images_sample = generator.predict(
                 np.random.normal(size=[10, 1, 100])
             )
             
             for idx in range(len(fake_images_sample)):
-                cv2.imwrite('epoch{}fakeimage{}.jpeg'.format(epoch, idx), (fake_images_sample[idx] + 1) * 255 / 2)
+                cv2.imwrite('epoch{}fakeimage{}.jpeg'.format(epoch + 1, idx), (fake_images_sample[idx] + 1) * 255 / 2)
+    
+    # Plot the generator and discriminator loss
+    plt.plot([i for i in range(len(gen_total_loss))], gen_total_loss, label="Generator")
+    plt.plot([i for i in range(len(disc_total_loss))], disc_total_loss, label="Discriminator")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss") 
+    plt.title ("GAN Loss")
+    plt.legend()
+    plt.savefig("gan_loss.jpeg")
